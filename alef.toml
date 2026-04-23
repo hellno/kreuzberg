@@ -47,6 +47,7 @@ sources = [
     "crates/kreuzberg/src/core/formats.rs",
     # Plugin trait (for trait bridges)
     "crates/kreuzberg/src/plugins/traits.rs",
+    "crates/kreuzberg/src/plugins/embedding.rs",
     "crates/kreuzberg/src/plugins/registry/mod.rs",
     # Public module APIs
     "crates/kreuzberg/src/rendering/mod.rs",
@@ -203,6 +204,7 @@ types = [
 
     # Internal registries and engines
     "DocumentExtractorRegistry",
+    "EmbeddingBackendRegistry",
     "OcrBackendRegistry",
     "PostProcessorRegistry",
     "RendererRegistry",
@@ -394,6 +396,7 @@ functions = [
 
     # Plugin registration — requires trait objects that can't be bound
     "register_ocr_backend",
+    "register_embedding_backend",
     "register_renderer",
 
     # Functions taking pdfium_render::PdfDocument — can't be passed from bindings
@@ -1084,6 +1087,12 @@ trait_name = "OcrBackend"
 super_trait = "kreuzberg::plugins::Plugin"
 registry_getter = "kreuzberg::plugins::registry::get_ocr_backend_registry"
 register_fn = "register_ocr_backend"
+
+[[trait_bridges]]
+trait_name = "EmbeddingBackend"
+super_trait = "kreuzberg::plugins::Plugin"
+registry_getter = "kreuzberg::plugins::registry::get_embedding_backend_registry"
+register_fn = "register_embedding_backend"
 
 # TODO: add PostProcessor and Validator bridges once OcrBackend is proven
 # [[trait_bridges]]

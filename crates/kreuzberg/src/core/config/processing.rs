@@ -87,7 +87,7 @@ impl PostProcessorConfig {
     ///
     /// This method converts the enabled/disabled processor Vec to HashSet
     /// for constant-time lookups in the pipeline.
-    pub(crate) fn build_lookup_sets(&mut self) {
+    pub fn build_lookup_sets(&mut self) {
         if let Some(ref enabled) = self.enabled_processors {
             self.enabled_set = Some(enabled.iter().cloned().collect());
         }
@@ -191,7 +191,7 @@ impl ChunkingConfig {
     /// Create a new `ChunkingConfig` with the given max characters, overlap, and trim settings.
     ///
     /// Other fields are set to their defaults. Use the setter methods to customize further.
-    pub(crate) fn new(max_characters: usize, overlap: usize, trim: bool) -> Self {
+    pub fn new(max_characters: usize, overlap: usize, trim: bool) -> Self {
         Self {
             max_characters,
             overlap,
@@ -206,19 +206,19 @@ impl ChunkingConfig {
     }
 
     /// Set the chunker type.
-    pub(crate) fn with_chunker_type(mut self, chunker_type: ChunkerType) -> Self {
+    pub fn with_chunker_type(mut self, chunker_type: ChunkerType) -> Self {
         self.chunker_type = chunker_type;
         self
     }
 
     /// Set the sizing strategy.
-    pub(crate) fn with_sizing(mut self, sizing: ChunkSizing) -> Self {
+    pub fn with_sizing(mut self, sizing: ChunkSizing) -> Self {
         self.sizing = sizing;
         self
     }
 
     /// Enable or disable prepending heading context to chunk content.
-    pub(crate) fn with_prepend_heading_context(mut self, prepend: bool) -> Self {
+    pub fn with_prepend_heading_context(mut self, prepend: bool) -> Self {
         self.prepend_heading_context = prepend;
         self
     }
@@ -228,7 +228,7 @@ impl ChunkingConfig {
     /// # Panics
     ///
     /// Panics if `threshold` is outside `[0.0, 1.0]`.
-    pub(crate) fn with_topic_threshold(mut self, threshold: f32) -> Self {
+    pub fn with_topic_threshold(mut self, threshold: f32) -> Self {
         assert!(
             (0.0..=1.0).contains(&threshold),
             "topic_threshold must be in [0.0, 1.0], got {threshold}"
@@ -249,7 +249,7 @@ impl ChunkingConfig {
     /// Requires the `embeddings` feature. Without it, this is a no-op that returns
     /// the config unchanged.
     #[cfg(feature = "embeddings")]
-    pub(crate) fn resolve_preset(&self) -> Self {
+    pub fn resolve_preset(&self) -> Self {
         let preset_name = match &self.preset {
             Some(name) => name,
             None => return self.clone(),
@@ -293,7 +293,7 @@ impl ChunkingConfig {
 
     /// Resolve a preset name (no-op without the `embeddings` feature).
     #[cfg(not(feature = "embeddings"))]
-    pub(crate) fn resolve_preset(&self) -> Self {
+    pub fn resolve_preset(&self) -> Self {
         if self.preset.is_some() {
             tracing::warn!("Chunking presets require the 'embeddings' feature");
         }
@@ -352,6 +352,20 @@ pub struct EmbeddingConfig {
     /// is used for inference. Defaults to `None` (auto-select per platform).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub acceleration: Option<super::acceleration::AccelerationConfig>,
+
+    /// Maximum wall-clock duration (in seconds) for a single `embed()` call when
+    /// using [`EmbeddingModelType::Plugin`].
+    ///
+    /// Applies only to the in-process plugin path — protects against hung
+    /// host-language backends (e.g. a Python callback deadlocked on the GIL,
+    /// a model stuck on CUDA OOM retries, etc.). On timeout, the dispatcher
+    /// returns [`crate::KreuzbergError::Plugin`] instead of blocking forever.
+    ///
+    /// `None` disables the timeout. The default (60 seconds) is conservative
+    /// for common in-process inference; increase for large batches on slow
+    /// hardware.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_embed_duration_secs: Option<u64>,
 }
 
 impl Default for EmbeddingConfig {
@@ -365,6 +379,7 @@ impl Default for EmbeddingConfig {
             show_download_progress: false,
             cache_dir: None,
             acceleration: None,
+            max_embed_duration_secs: Some(60),
         }
     }
 }
@@ -384,6 +399,23 @@ pub enum EmbeddingModelType {
     /// Uses the model specified in the nested `LlmConfig` (e.g.,
     /// `"openai/text-embedding-3-small"`).
     Llm { llm: super::llm::LlmConfig },
+
+    /// In-process embedding backend registered via the plugin system.
+    ///
+    /// The caller registers an [`EmbeddingBackend`](crate::plugins::EmbeddingBackend) once
+    /// (e.g. a wrapper around an already-loaded `llama-cpp-python`, `sentence-transformers`,
+    /// or tuned ONNX model), then references it by name in config. Kreuzberg calls back
+    /// into the registered backend during chunking and standalone embed requests —
+    /// no HuggingFace download, no ONNX Runtime requirement, no HTTP sidecar.
+    ///
+    /// When this variant is selected, only the following [`EmbeddingConfig`] fields
+    /// apply: `normalize` (post-call L2 normalization) and `max_embed_duration_secs`
+    /// (dispatcher timeout). Model-loading fields (`batch_size`, `cache_dir`,
+    /// `show_download_progress`, `acceleration`) are ignored — the host owns the
+    /// model lifecycle.
+    ///
+    /// See [`crate::plugins::register_embedding_backend`].
+    Plugin { name: String },
 }
 
 impl Default for EmbeddingModelType {
@@ -535,6 +567,7 @@ mod tests {
             show_download_progress: false,
             cache_dir: None,
             acceleration: None,
+            max_embed_duration_secs: Some(60),
         };
 
         let json = serde_json::to_string(&config).unwrap();
@@ -690,6 +723,32 @@ mod tests {
                 assert_eq!(dimensions, 512);
             }
             _ => panic!("Expected Custom variant"),
+        }
+    }
+
+    #[test]
+    fn test_embedding_model_type_plugin_roundtrip() {
+        let model = EmbeddingModelType::Plugin {
+            name: "lilbee-llamacpp".to_string(),
+        };
+        let json = serde_json::to_string(&model).unwrap();
+        assert!(json.contains("\"type\":\"plugin\""));
+        assert!(json.contains("lilbee-llamacpp"));
+
+        let deserialized: EmbeddingModelType = serde_json::from_str(&json).unwrap();
+        match deserialized {
+            EmbeddingModelType::Plugin { name } => assert_eq!(name, "lilbee-llamacpp"),
+            _ => panic!("Expected Plugin variant"),
+        }
+    }
+
+    #[test]
+    fn test_embedding_model_type_plugin_deserialization() {
+        let json = r#"{"type": "plugin", "name": "my-embedder"}"#;
+        let model: EmbeddingModelType = serde_json::from_str(json).unwrap();
+        match model {
+            EmbeddingModelType::Plugin { name } => assert_eq!(name, "my-embedder"),
+            _ => panic!("Expected Plugin variant"),
         }
     }
 }

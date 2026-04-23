@@ -7,6 +7,7 @@
 //!
 //! - [`Plugin`] - Base trait that all plugins must implement
 //! - [`OcrBackend`] - OCR processing plugins
+//! - [`EmbeddingBackend`] - In-process embedding backend plugins
 //! - [`DocumentExtractor`] - Document format extraction plugins
 //! - [`PostProcessor`] - Content post-processing plugins
 //! - [`Validator`] - Validation plugins
@@ -174,6 +175,7 @@
 //! }
 //! ```
 
+pub(crate) mod embedding;
 pub(crate) mod extractor;
 mod ocr;
 mod processor;
@@ -183,6 +185,7 @@ pub mod startup_validation;
 mod traits;
 mod validator;
 
+pub use embedding::EmbeddingBackend;
 pub use extractor::DocumentExtractor;
 pub use ocr::{OcrBackend, OcrBackendType};
 pub use processor::{PostProcessor, ProcessingStage, list_post_processors};
@@ -192,8 +195,9 @@ pub use validator::Validator;
 
 // Re-export registry items for backward compatibility
 pub use registry::{
-    DOCUMENT_EXTRACTOR_REGISTRY, DocumentExtractorRegistry, OCR_BACKEND_REGISTRY, OcrBackendRegistry,
-    POST_PROCESSOR_REGISTRY, PostProcessorRegistry, RENDERER_REGISTRY, RendererRegistry, VALIDATOR_REGISTRY,
-    ValidatorRegistry, get_document_extractor_registry, get_ocr_backend_registry, get_post_processor_registry,
-    get_renderer_registry, get_validator_registry,
+    DOCUMENT_EXTRACTOR_REGISTRY, DocumentExtractorRegistry, EMBEDDING_BACKEND_REGISTRY, EmbeddingBackendRegistry,
+    OCR_BACKEND_REGISTRY, OcrBackendRegistry, POST_PROCESSOR_REGISTRY, PostProcessorRegistry, RENDERER_REGISTRY,
+    RendererRegistry, VALIDATOR_REGISTRY, ValidatorRegistry, get_document_extractor_registry,
+    get_embedding_backend_registry, get_ocr_backend_registry, get_post_processor_registry, get_renderer_registry,
+    get_validator_registry,
 };

@@ -29,6 +29,7 @@ impl ExtractionConfig {
     /// - `KREUZBERG_LLM_BASE_URL`: Custom base URL for the structured extraction LLM provider
     /// - `KREUZBERG_VLM_OCR_MODEL`: VLM model for vision-based OCR (e.g., "openai/gpt-4o")
     /// - `KREUZBERG_VLM_EMBEDDING_MODEL`: LLM model for embedding generation (e.g., "openai/text-embedding-3-small")
+    /// - `KREUZBERG_EMBEDDING_PLUGIN_NAME`: Name of an in-process embedding backend registered via `plugins::register_embedding_backend`
     /// - `KREUZBERG_MSG_FALLBACK_CODEPAGE`: (deferred) Windows codepage for MSG PT_STRING8 fallback
     ///
     /// # Behavior
@@ -56,7 +57,7 @@ impl ExtractionConfig {
     /// - An environment variable contains an invalid value
     /// - A number cannot be parsed as the expected type
     /// - A boolean is not "true" or "false"
-    pub(crate) fn apply_env_overrides(&mut self) -> Result<()> {
+    pub fn apply_env_overrides(&mut self) -> Result<()> {
         use crate::core::config_validation::{
             validate_chunking_params, validate_language_code, validate_ocr_backend, validate_token_reduction_level,
         };
@@ -371,6 +372,29 @@ impl ExtractionConfig {
                             max_tokens: None,
                         },
                     },
+                    ..super::super::processing::EmbeddingConfig::default()
+                });
+            }
+        }
+
+        // KREUZBERG_EMBEDDING_PLUGIN_NAME override.
+        // Selects an already-registered in-process embedding backend by name.
+        // Takes precedence over the other embedding env vars — host applications
+        // that manage their own embedder register it at startup then set this
+        // env var to route kreuzberg's chunking pipeline into it.
+        if let Ok(value) = std::env::var("KREUZBERG_EMBEDDING_PLUGIN_NAME") {
+            if value.is_empty() {
+                return Err(KreuzbergError::Validation {
+                    message: "KREUZBERG_EMBEDDING_PLUGIN_NAME must not be empty".to_string(),
+                    source: None,
+                });
+            }
+            if self.chunking.is_none() {
+                self.chunking = Some(ChunkingConfig::default());
+            }
+            if let Some(ref mut chunking) = self.chunking {
+                chunking.embedding = Some(super::super::processing::EmbeddingConfig {
+                    model: super::super::processing::EmbeddingModelType::Plugin { name: value },
                     ..super::super::processing::EmbeddingConfig::default()
                 });
             }

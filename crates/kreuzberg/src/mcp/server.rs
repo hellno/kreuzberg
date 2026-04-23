@@ -58,7 +58,7 @@ impl KreuzbergMcp {
     /// in current and parent directories. Falls back to default configuration if
     /// no config file is found.
     #[allow(clippy::manual_unwrap_or_default)]
-    pub(crate) fn new() -> crate::Result<Self> {
+    pub fn new() -> crate::Result<Self> {
         let config = match ExtractionConfig::discover()? {
             Some(config) => {
                 #[cfg(feature = "api")]
@@ -80,7 +80,7 @@ impl KreuzbergMcp {
     /// # Arguments
     ///
     /// * `config` - Default extraction configuration for all tool calls
-    pub(crate) fn with_config(config: ExtractionConfig) -> Self {
+    pub fn with_config(config: ExtractionConfig) -> Self {
         let extraction_service = ExtractionServiceBuilder::new().with_tracing().with_metrics().build();
 
         Self {
@@ -687,8 +687,22 @@ fn embed_text_impl(params: super::params::EmbedTextParams) -> Result<CallToolRes
         ));
     }
 
-    // When `model` is set, use LLM-based embeddings via liter-llm
-    let (config, model_name) = if let Some(ref model) = params.model {
+    // Resolution order: embedding_plugin → model → preset.
+    let (config, model_name) = if let Some(ref plugin_name) = params.embedding_plugin {
+        if plugin_name.is_empty() {
+            return Err(rmcp::ErrorData::invalid_params(
+                "embedding_plugin must not be empty when set".to_string(),
+                None,
+            ));
+        }
+        let config = crate::core::config::EmbeddingConfig {
+            model: crate::core::config::EmbeddingModelType::Plugin {
+                name: plugin_name.clone(),
+            },
+            ..Default::default()
+        };
+        (config, plugin_name.clone())
+    } else if let Some(ref model) = params.model {
         let llm_config = crate::core::config::llm::LlmConfig {
             model: model.clone(),
             api_key: params.api_key.clone(),
@@ -898,7 +912,7 @@ impl Default for KreuzbergMcp {
 ///     Ok(())
 /// }
 /// ```
-pub(crate) async fn start_mcp_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+pub async fn start_mcp_server() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let service = KreuzbergMcp::new()?.serve(stdio()).await?;
 
     service.waiting().await?;
@@ -909,7 +923,7 @@ pub(crate) async fn start_mcp_server() -> Result<(), Box<dyn std::error::Error +
 ///
 /// This variant allows specifying a custom extraction configuration
 /// (e.g., loaded from a file) instead of using defaults.
-pub(crate) async fn start_mcp_server_with_config(
+pub async fn start_mcp_server_with_config(
     config: ExtractionConfig,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let service = KreuzbergMcp::with_config(config).serve(stdio()).await?;
@@ -939,7 +953,7 @@ pub(crate) async fn start_mcp_server_with_config(
 /// }
 /// ```
 #[cfg(feature = "mcp-http")]
-pub(crate) async fn start_mcp_server_http(
+pub async fn start_mcp_server_http(
     host: impl AsRef<str>,
     port: u16,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
@@ -992,7 +1006,7 @@ pub(crate) async fn start_mcp_server_http(
 /// }
 /// ```
 #[cfg(feature = "mcp-http")]
-pub(crate) async fn start_mcp_server_http_with_config(
+pub async fn start_mcp_server_http_with_config(
     host: impl AsRef<str>,
     port: u16,
     config: ExtractionConfig,

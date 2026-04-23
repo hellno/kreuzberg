@@ -2,9 +2,212 @@
 title: "PHP API Reference"
 ---
 
-## PHP API Reference <span class="version-badge">v4.9.2</span>
+## PHP API Reference <span class="version-badge">v4.9.5</span>
 
 ### Functions
+
+#### blake3HashBytes()
+
+Hash arbitrary bytes with blake3, returning a 32-char hex string.
+
+**Signature:**
+
+```php
+public static function blake3HashBytes(string $data): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `string` | Yes | The data |
+
+**Returns:** `string`
+
+
+---
+
+#### blake3HashFile()
+
+Hash a file's content with blake3 using streaming 64 KiB reads.
+
+Returns a 32-char hex string (128 bits of blake3 output).
+
+**Signature:**
+
+```php
+public static function blake3HashFile(string $path): string
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `path` | `string` | Yes | Path to the file |
+
+**Returns:** `string`
+
+**Errors:** Throws `Error`.
+
+
+---
+
+#### fastHash()
+
+**Signature:**
+
+```php
+public static function fastHash(string $data): int
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `string` | Yes | The data |
+
+**Returns:** `int`
+
+
+---
+
+#### validateCacheKey()
+
+**Signature:**
+
+```php
+public static function validateCacheKey(string $key): bool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `key` | `string` | Yes | The key |
+
+**Returns:** `bool`
+
+
+---
+
+#### validatePort()
+
+Validate a port number for server configuration.
+
+Port must be in the range 1-65535. While ports 1-1023 are privileged and may require
+special permissions on some systems, they are still valid port numbers.
+
+**Returns:**
+
+`Ok(())` if the port is valid, or a `ValidationError` with details about valid ranges.
+
+**Signature:**
+
+```php
+public static function validatePort(int $port): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `port` | `int` | Yes | The port number to validate |
+
+**Returns:** `void`
+
+**Errors:** Throws `Error`.
+
+
+---
+
+#### validateHost()
+
+Validate a host/IP address string for server configuration.
+
+Accepts valid IPv4 addresses (e.g., "127.0.0.1", "0.0.0.0"), valid IPv6 addresses
+(e.g., "::1", "::"), and hostnames (e.g., "localhost", "example.com").
+
+**Returns:**
+
+`Ok(())` if the host is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```php
+public static function validateHost(string $host): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `host` | `string` | Yes | The host/IP address string to validate |
+
+**Returns:** `void`
+
+**Errors:** Throws `Error`.
+
+
+---
+
+#### validateCorsOrigin()
+
+Validate a CORS (Cross-Origin Resource Sharing) origin URL.
+
+Accepts valid HTTP/HTTPS URLs (e.g., "<https://example.com">) or the wildcard "*"
+to allow all origins. URLs must start with "<http://"> or "<https://",> or be exactly "*".
+
+**Returns:**
+
+`Ok(())` if the origin is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```php
+public static function validateCorsOrigin(string $origin): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `origin` | `string` | Yes | The CORS origin URL to validate |
+
+**Returns:** `void`
+
+**Errors:** Throws `Error`.
+
+
+---
+
+#### validateUploadSize()
+
+Validate an upload size limit for server configuration.
+
+Upload size must be greater than 0 (measured in bytes).
+
+**Returns:**
+
+`Ok(())` if the size is valid, or a `ValidationError` with details about constraints.
+
+**Signature:**
+
+```php
+public static function validateUploadSize(int $size): void
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `size` | `int` | Yes | The maximum upload size in bytes to validate |
+
+**Returns:** `void`
+
+**Errors:** Throws `Error`.
+
+
+---
 
 #### validateBinarizationMethod()
 
@@ -791,6 +994,23 @@ public static function listSupportedFormats(): array<SupportedFormat>
 
 ---
 
+#### clearProcessorCache()
+
+Clear the processor cache (primarily for testing when registry changes).
+
+**Signature:**
+
+```php
+public static function clearProcessorCache(): void
+```
+
+**Returns:** `void`
+
+**Errors:** Throws `Error`.
+
+
+---
+
 #### transformExtractionResultToElements()
 
 Transform an extraction result into semantic elements.
@@ -1042,6 +1262,21 @@ public static function listPostProcessors(): array<string>
 **Returns:** `array<string>`
 
 **Errors:** Throws `Error`.
+
+
+---
+
+#### getEmbeddingBackendRegistry()
+
+Get the global embedding backend registry.
+
+**Signature:**
+
+```php
+public static function getEmbeddingBackendRegistry(): string
+```
+
+**Returns:** `string`
 
 
 ---
@@ -1535,6 +1770,58 @@ public static function calculateTextConfidence(string $text): float
 | `text` | `string` | Yes | The text |
 
 **Returns:** `float`
+
+
+---
+
+#### createStringBufferPool()
+
+Create a pre-configured string buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for text accumulation with reasonable defaults.
+
+**Signature:**
+
+```php
+public static function createStringBufferPool(int $poolSize, int $bufferCapacity): StringBufferPool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `poolSize` | `int` | Yes | Maximum number of buffers to keep in the pool |
+| `bufferCapacity` | `int` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `StringBufferPool`
+
+
+---
+
+#### createByteBufferPool()
+
+Create a pre-configured byte buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for binary data handling with reasonable defaults.
+
+**Signature:**
+
+```php
+public static function createByteBufferPool(int $poolSize, int $bufferCapacity): ByteBufferPool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `poolSize` | `int` | Yes | Maximum number of buffers to keep in the pool |
+| `bufferCapacity` | `int` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `ByteBufferPool`
 
 
 ---
@@ -2182,25 +2469,6 @@ Request parameters for cache warm (model download).
 
 ---
 
-#### CharData
-
-Character information extracted from PDF with font metrics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `string` | — | The character text content |
-| `x` | `float` | — | X position in PDF units |
-| `y` | `float` | — | Y position in PDF units |
-| `fontSize` | `float` | — | Font size in points |
-| `width` | `float` | — | Character width in PDF units |
-| `height` | `float` | — | Character height in PDF units |
-| `isBold` | `bool` | — | Whether the font is bold (from pdfium force-bold flag) |
-| `isItalic` | `bool` | — | Whether the font is italic |
-| `baselineY` | `float` | — | Baseline Y position (from character origin, falls back to bounds bottom) |
-
-
----
-
 #### Chunk
 
 A text chunk with optional embedding and metadata.
@@ -2302,6 +2570,70 @@ Use `..the default constructor` when constructing to allow for future field addi
 | `topicThreshold` | `?float` | `null` | Optional cosine similarity threshold for semantic topic boundary detection. Only used when `chunker_type` is `Semantic` and an `EmbeddingConfig` is provided. You almost never need to set this. When omitted, defaults to `0.75` which works well for most documents. Lower values detect more topic boundaries (more, smaller chunks); higher values detect fewer. Range: `0.0..=1.0`. |
 
 ##### Methods
+
+###### withChunkerType()
+
+Set the chunker type.
+
+**Signature:**
+
+```php
+public function withChunkerType(ChunkerType $chunkerType): ChunkingConfig
+```
+
+###### withSizing()
+
+Set the sizing strategy.
+
+**Signature:**
+
+```php
+public function withSizing(ChunkSizing $sizing): ChunkingConfig
+```
+
+###### withPrependHeadingContext()
+
+Enable or disable prepending heading context to chunk content.
+
+**Signature:**
+
+```php
+public function withPrependHeadingContext(bool $prepend): ChunkingConfig
+```
+
+###### withTopicThreshold()
+
+Set the cosine similarity threshold for semantic topic boundary detection.
+
+**Panics:**
+
+Panics if `threshold` is outside `[0.0, 1.0]`.
+
+**Signature:**
+
+```php
+public function withTopicThreshold(float $threshold): ChunkingConfig
+```
+
+###### resolvePreset()
+
+Resolve a preset name into concrete chunking and embedding configuration.
+
+When `preset` is set (e.g., `"balanced"`), this overrides `max_characters` and
+`overlap` from the preset definition, and configures the embedding model if
+no embedding config was explicitly provided.
+
+If the preset name is not recognized, a warning is logged and the config
+is returned unchanged.
+
+Requires the `embeddings` feature. Without it, this is a no-op that returns
+the config unchanged.
+
+**Signature:**
+
+```php
+public function resolvePreset(): ChunkingConfig
+```
 
 ###### default()
 
@@ -2820,6 +3152,7 @@ Request parameters for embedding generation.
 | `preset` | `?string` | `null` | Embedding preset name (default: "balanced"). Available: "speed", "balanced", "quality" |
 | `model` | `?string` | `null` | LLM model for provider-hosted embeddings (e.g., "openai/text-embedding-3-small"). When set, overrides preset and uses liter-llm for embedding generation. |
 | `apiKey` | `?string` | `null` | API key for the LLM provider (optional, falls back to env). |
+| `embeddingPlugin` | `?string` | `null` | Name of a pre-registered in-process embedding plugin backend. When set, overrides both preset and model and dispatches to the registered callback. Requires a prior call to `kreuzberg::plugins::register_embedding_backend`. |
 
 
 ---
@@ -2833,6 +3166,76 @@ Embedded file descriptor extracted from the PDF name tree.
 | `name` | `string` | — | The filename as stored in the PDF name tree. |
 | `data` | `string` | — | Raw file bytes from the embedded stream. |
 | `mimeType` | `?string` | `null` | MIME type if specified in the filespec, otherwise `null`. |
+
+
+---
+
+#### EmbeddingBackend
+
+Trait for in-process embedding backend plugins.
+
+Async to match the convention used by `crate::plugins::OcrBackend`,
+`crate::plugins::DocumentExtractor`, and `crate::plugins::PostProcessor`.
+Host-language bridges (PyO3, napi-rs, Rustler, extendr, magnus, ext-php-rs,
+C FFI, etc.) wrap their synchronous host callables in `spawn_blocking` or the
+equivalent to satisfy the async signature.
+
+# Thread safety
+
+Backends must be `Send + Sync + 'static`. They are stored in
+`Arc<dyn EmbeddingBackend>` and called concurrently from kreuzberg's chunking
+pipeline. If the backend's underlying model isn't thread-safe, the backend
+itself must serialize access internally (e.g. via `Mutex<Inner>`).
+
+# Contract
+
+- `embed(texts)` MUST return exactly `texts.len()` vectors, each of length
+  `self.dimensions()`. The dispatcher in `crate::embeddings::embed_texts`
+  validates this before returning to downstream consumers; a non-conforming
+  backend surfaces as a `KreuzbergError::Validation`, not a panic.
+- `embed` may be called from any thread. Its future must be `Send`
+  (enforced by `async_trait` when `#[async_trait]` is used on non-WASM targets).
+- `dimensions()` is called exactly once at registration, immediately after
+  `initialize()` succeeds. The returned value is cached by the registry and
+  used for all subsequent shape validation. Lazy-loading implementations can
+  defer model loading into `initialize()` and report the real dimension
+  afterwards. Later mutations of the backend's reported dimension are not
+  observed by kreuzberg — implementations that need to change dimension
+  must unregister and re-register.
+- `shutdown()` (inherited from `crate::plugins::Plugin`) may be invoked
+  concurrently with an in-flight `embed()` call. Implementations must
+  tolerate this — e.g. by letting in-flight calls finish using resources
+  held via the `Arc<dyn EmbeddingBackend>` reference, and only releasing
+  shared state that isn't needed by `embed`.
+
+##### Methods
+
+###### dimensions()
+
+Embedding vector dimension. Must be `> 0` and must match the length of
+every vector returned by `embed`.
+
+**Signature:**
+
+```php
+public function dimensions(): int
+```
+
+###### embed()
+
+Embed a batch of texts, returning one vector per input in order.
+
+**Errors:**
+
+Implementations should return `crate::KreuzbergError::Plugin` for
+backend-specific failures. The dispatcher layers its own validation
+(length, per-vector dimension) on top.
+
+**Signature:**
+
+```php
+public function embed(array<string> $texts): array<array<float>>
+```
 
 
 ---
@@ -2852,6 +3255,7 @@ Requires the `embeddings` feature to be enabled.
 | `showDownloadProgress` | `bool` | `false` | Show model download progress |
 | `cacheDir` | `?string` | `null` | Custom cache directory for model files Defaults to `~/.cache/kreuzberg/embeddings/` if not specified. Allows full customization of model download location. |
 | `acceleration` | `?AccelerationConfig` | `null` | Hardware acceleration for the embedding ONNX model. When set, controls which execution provider (CPU, CUDA, CoreML, TensorRT) is used for inference. Defaults to `null` (auto-select per platform). |
+| `maxEmbedDurationSecs` | `?int` | `null` | Maximum wall-clock duration (in seconds) for a single `embed()` call when using `EmbeddingModelType::Plugin`. Applies only to the in-process plugin path — protects against hung host-language backends (e.g. a Python callback deadlocked on the GIL, a model stuck on CUDA OOM retries, etc.). On timeout, the dispatcher returns `crate::KreuzbergError::Plugin` instead of blocking forever. `null` disables the timeout. The default (60 seconds) is conservative for common in-process inference; increase for large batches on slow hardware. |
 
 ##### Methods
 
@@ -3042,7 +3446,7 @@ Extracted inline image with metadata.
 | `format` | `string` | — | Format |
 | `filename` | `?string` | `null` | Filename |
 | `description` | `?string` | `null` | Human-readable description |
-| `dimensions` | `?string` | `null` | Dimensions |
+| `dimensions` | `?array<int>` | `null` | Dimensions |
 | `attributes` | `array<string>` | — | Attributes |
 
 
@@ -3098,6 +3502,26 @@ It can be loaded from TOML, YAML, or JSON files, or created programmatically.
 
 ```php
 public static function default(): ExtractionConfig
+```
+
+###### needsImageProcessing()
+
+Check if image processing is needed by examining OCR and image extraction settings.
+
+Returns `true` if either OCR is enabled or image extraction is configured,
+indicating that image decompression and processing should occur.
+Returns `false` if both are disabled, allowing optimization to skip unnecessary
+image decompression for text-only extraction workflows.
+
+# Optimization Impact
+For text-only extractions (no OCR, no image extraction), skipping image
+decompression can improve CPU utilization by 5-10% by avoiding wasteful
+image I/O and processing when results won't be used.
+
+**Signature:**
+
+```php
+public function needsImageProcessing(): bool
 ```
 
 
@@ -3191,18 +3615,6 @@ cannot be overridden per file:
 | `timeoutSecs` | `?int` | `null` | Override per-file extraction timeout in seconds. When set, the extraction for this file will be canceled after the specified duration. A timed-out file produces an error result without affecting other files in the batch. |
 | `treeSitter` | `?TreeSitterConfig` | `null` | Override tree-sitter configuration for this file. |
 | `structuredExtraction` | `?StructuredExtractionConfig` | `null` | Override structured extraction configuration for this file. When set, enables LLM-based structured extraction with a JSON schema for this specific file. The extracted content is sent to a VLM/LLM and the response is parsed according to the provided schema. |
-
-
----
-
-#### FontSizeCluster
-
-A cluster of text blocks with the same font size characteristics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `centroid` | `float` | — | The centroid (mean) font size of this cluster |
-| `members` | `array<string>` | — | The text blocks that belong to this cluster |
 
 
 ---
@@ -3331,21 +3743,7 @@ font size clustering and hierarchical analysis.
 | `text` | `string` | — | The text content of this block |
 | `fontSize` | `float` | — | The font size of the text in this block |
 | `level` | `string` | — | The hierarchy level of this block (H1-H6 or Body) Levels correspond to HTML heading tags: - "h1": Top-level heading - "h2": Secondary heading - "h3": Tertiary heading - "h4": Quaternary heading - "h5": Quinary heading - "h6": Senary heading - "body": Body text (no heading level) |
-| `bbox` | `?string` | `null` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
-
-
----
-
-#### HierarchyBlock
-
-A TextBlock with hierarchy level assignment.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `string` | — | The text content |
-| `bbox` | `string` | — | The bounding box of the block |
-| `fontSize` | `float` | — | The font size of the text in this block |
-| `hierarchyLevel` | `string` | — | The hierarchy level of this block (H1-H6 or Body) |
+| `bbox` | `?array<float>` | `null` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
 
 
 ---
@@ -3472,6 +3870,7 @@ Image extraction configuration.
 | `autoAdjustDpi` | `bool` | — | Automatically adjust DPI based on image content |
 | `minDpi` | `int` | — | Minimum DPI threshold |
 | `maxDpi` | `int` | — | Maximum DPI threshold |
+| `maxImagesPerPage` | `?int` | `null` | Maximum number of image objects to extract per PDF page. Some PDFs (e.g. technical diagrams stored as thousands of raster fragments) can trigger extremely long or indefinite extraction times when every image object on a dense page is decoded individually via pdfium FFI. Setting this limit causes kreuzberg to stop collecting individual images once the count per page reaches the cap and emit a warning instead. `null` (default) means no limit — all images are extracted. |
 
 
 ---
@@ -3485,7 +3884,7 @@ Image element metadata.
 | `src` | `string` | — | Image source (URL, data URI, or SVG content) |
 | `alt` | `?string` | `null` | Alternative text from alt attribute |
 | `title` | `?string` | `null` | Title attribute |
-| `dimensions` | `?string` | `null` | Image dimensions as (width, height) if available |
+| `dimensions` | `?array<int>` | `null` | Image dimensions as (width, height) if available |
 | `imageType` | `ImageType` | — | Image type classification |
 | `attributes` | `array<string>` | — | Additional attributes as key-value pairs |
 
@@ -3545,13 +3944,13 @@ including DPI normalization, resizing, and resampling.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `originalDimensions` | `string` | — | Original image dimensions (width, height) in pixels |
-| `originalDpi` | `string` | — | Original image DPI (horizontal, vertical) |
+| `originalDimensions` | `array<int>` | — | Original image dimensions (width, height) in pixels |
+| `originalDpi` | `array<float>` | — | Original image DPI (horizontal, vertical) |
 | `targetDpi` | `int` | — | Target DPI from configuration |
 | `scaleFactor` | `float` | — | Scaling factor applied to the image |
 | `autoAdjusted` | `bool` | — | Whether DPI was auto-adjusted based on content |
 | `finalDpi` | `int` | — | Final DPI after processing |
-| `newDimensions` | `?string` | `null` | New dimensions after resizing (if resized) |
+| `newDimensions` | `?array<int>` | `null` | New dimensions after resizing (if resized) |
 | `resampleMethod` | `string` | — | Resampling algorithm used ("LANCZOS3", "CATMULLROM", etc.) |
 | `dimensionClamped` | `bool` | — | Whether dimensions were clamped to max_image_dimension |
 | `calculatedDpi` | `?int` | `null` | Calculated optimal DPI (if auto_adjust_dpi enabled) |
@@ -3633,7 +4032,7 @@ Keyword extraction configuration.
 | `algorithm` | `KeywordAlgorithm` | `KeywordAlgorithm::Yake` | Algorithm to use for extraction. |
 | `maxKeywords` | `int` | `10` | Maximum number of keywords to extract (default: 10). |
 | `minScore` | `float` | `0` | Minimum score threshold (0.0-1.0, default: 0.0). Keywords with scores below this threshold are filtered out. Note: Score ranges differ between algorithms. |
-| `ngramRange` | `string` | — | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
+| `ngramRange` | `array<int>` | `[]` | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
 | `language` | `?string` | `null` | Language code for stopword filtering (e.g., "en", "de", "fr"). If None, no stopword filtering is applied. |
 | `yakeParams` | `?YakeParams` | `null` | YAKE-specific tuning parameters. |
 | `rakeParams` | `?RakeParams` | `null` | RAKE-specific tuning parameters. |
@@ -3880,6 +4279,137 @@ Combined paths to all models needed for OCR (backward compatibility).
 
 ---
 
+#### OcrBackend
+
+Trait for OCR backend plugins.
+
+Implement this trait to add custom OCR capabilities. OCR backends can be:
+- Native Rust implementations (like Tesseract)
+- FFI bridges to Python libraries (like EasyOCR, PaddleOCR)
+- Cloud-based OCR services (Google Vision, AWS Textract, etc.)
+
+# Thread Safety
+
+OCR backends must be thread-safe (`Send + Sync`) to support concurrent processing.
+
+##### Methods
+
+###### processImage()
+
+Process an image and extract text via OCR.
+
+**Returns:**
+
+An `ExtractionResult` containing the extracted text and metadata.
+
+**Errors:**
+
+- `KreuzbergError::Ocr` - OCR processing failed
+- `KreuzbergError::Validation` - Invalid image format or configuration
+- `KreuzbergError::Io` - I/O errors (these always bubble up)
+
+**Signature:**
+
+```php
+public function processImage(string $imageBytes, OcrConfig $config): ExtractionResult
+```
+
+###### processImageFile()
+
+Process a file and extract text via OCR.
+
+Default implementation reads the file and calls `process_image`.
+Override for custom file handling or optimizations.
+
+**Errors:**
+
+Same as `process_image`, plus file I/O errors.
+
+**Signature:**
+
+```php
+public function processImageFile(string $path, OcrConfig $config): ExtractionResult
+```
+
+###### supportsLanguage()
+
+Check if this backend supports a given language code.
+
+**Returns:**
+
+`true` if the language is supported, `false` otherwise.
+
+**Signature:**
+
+```php
+public function supportsLanguage(string $lang): bool
+```
+
+###### backendType()
+
+Get the backend type identifier.
+
+**Returns:**
+
+The backend type enum value.
+
+**Signature:**
+
+```php
+public function backendType(): OcrBackendType
+```
+
+###### supportedLanguages()
+
+Optional: Get a list of all supported languages.
+
+Defaults to empty list. Override to provide comprehensive language support info.
+
+**Signature:**
+
+```php
+public function supportedLanguages(): array<string>
+```
+
+###### supportsTableDetection()
+
+Optional: Check if the backend supports table detection.
+
+Defaults to `false`. Override if your backend can detect and extract tables.
+
+**Signature:**
+
+```php
+public function supportsTableDetection(): bool
+```
+
+###### supportsDocumentProcessing()
+
+Check if the backend supports direct document-level processing (e.g. for PDFs).
+
+Defaults to `false`. Override if the backend has optimized document processing.
+
+**Signature:**
+
+```php
+public function supportsDocumentProcessing(): bool
+```
+
+###### processDocument()
+
+Process a document file directly via OCR.
+
+Only called if `supports_document_processing` returns `true`.
+
+**Signature:**
+
+```php
+public function processDocument(string $path, OcrConfig $config): ExtractionResult
+```
+
+
+---
+
 #### OcrCacheStats
 
 | Field | Type | Default | Description |
@@ -3923,6 +4453,7 @@ OCR configuration.
 | `autoRotate` | `bool` | `false` | Enable automatic page rotation based on orientation detection. When enabled, uses Tesseract's `DetectOrientationScript()` to detect page orientation (0/90/180/270 degrees) before OCR. If the page is rotated with high confidence, the image is corrected before recognition. This is critical for handling rotated scanned documents. |
 | `vlmConfig` | `?LlmConfig` | `null` | VLM (Vision Language Model) OCR configuration. Required when `backend` is `"vlm"`. Uses liter-llm to send page images to a vision model for text extraction. |
 | `vlmPrompt` | `?string` | `null` | Custom Jinja2 prompt template for VLM OCR. When `null`, uses the default template. Available variables: - `{{ language }}` — The document language code (e.g., "eng", "deu"). |
+| `acceleration` | `?AccelerationConfig` | `null` | Hardware acceleration for ONNX Runtime models (e.g. PaddleOCR, layout detection). Not user-configurable via config files — injected at runtime from `ExtractionConfig::acceleration` before each `process_image` call. |
 
 ##### Methods
 
@@ -3989,18 +4520,6 @@ including recognized text and detected tables.
 | `tables` | `array<OcrTable>` | — | Tables detected and extracted via OCR |
 | `ocrElements` | `?array<OcrElement>` | `null` | Structured OCR elements with bounding boxes and confidence scores. Available when TSV output is requested or table detection is enabled. |
 | `internalDocument` | `?string` | `null` | Structured document produced from hOCR parsing. Carries paragraph structure, bounding boxes, and confidence scores that the flattened `content` string discards. |
-
-
----
-
-#### OcrFallbackDecision
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `stats` | `string` | — | Stats |
-| `avgNonWhitespace` | `float` | — | Avg non whitespace |
-| `avgAlnum` | `float` | — | Avg alnum |
-| `fallback` | `bool` | — | Fallback |
 
 
 ---
@@ -4336,7 +4855,7 @@ and visibility state (for presentations).
 |-------|------|---------|-------------|
 | `number` | `int` | — | Page number (1-indexed) |
 | `title` | `?string` | `null` | Page title (usually for presentations) |
-| `dimensions` | `?string` | `null` | Dimensions in points (PDF) or pixels (images): (width, height) |
+| `dimensions` | `?array<float>` | `null` | Dimensions in points (PDF) or pixels (images): (width, height) |
 | `imageCount` | `?int` | `null` | Number of images on this page |
 | `tableCount` | `?int` | `null` | Number of tables on this page |
 | `hidden` | `?bool` | `null` | Whether this page is hidden (e.g., in presentations) |
@@ -4612,6 +5131,19 @@ Post-processor configuration.
 | `disabledSet` | `?string` | `null` | Pre-computed AHashSet for O(1) disabled processor lookup |
 
 ##### Methods
+
+###### buildLookupSets()
+
+Pre-compute HashSets for O(1) processor name lookups.
+
+This method converts the enabled/disabled processor Vec to HashSet
+for constant-time lookups in the pipeline.
+
+**Signature:**
+
+```php
+public function buildLookupSets(): void
+```
 
 ###### default()
 
@@ -5553,6 +6085,7 @@ Embedding model types supported by Kreuzberg.
 | `Preset` | Use a preset model configuration (recommended) — Fields: `name`: `string` |
 | `Custom` | Use a custom ONNX model from HuggingFace — Fields: `modelId`: `string`, `dimensions`: `int` |
 | `Llm` | Provider-hosted embedding model via liter-llm. Uses the model specified in the nested `LlmConfig` (e.g., `"openai/text-embedding-3-small"`). — Fields: `llm`: `LlmConfig` |
+| `Plugin` | In-process embedding backend registered via the plugin system. The caller registers an `EmbeddingBackend` once (e.g. a wrapper around an already-loaded `llama-cpp-python`, `sentence-transformers`, or tuned ONNX model), then references it by name in config. Kreuzberg calls back into the registered backend during chunking and standalone embed requests — no HuggingFace download, no ONNX Runtime requirement, no HTTP sidecar. When this variant is selected, only the following `EmbeddingConfig` fields apply: `normalize` (post-call L2 normalization) and `max_embed_duration_secs` (dispatcher timeout). Model-loading fields (`batch_size`, `cache_dir`, `show_download_progress`, `acceleration`) are ignored — the host owns the model lifecycle. See `crate::plugins::register_embedding_backend`. — Fields: `name`: `string` |
 
 
 ---
@@ -5581,6 +6114,20 @@ of `ExtractionResult`.
 | `NoBar` | No bar |
 | `Linear` | Linear |
 | `Skewed` | Skewed |
+
+
+---
+
+#### OcrBackendType
+
+OCR backend types.
+
+| Value | Description |
+|-------|-------------|
+| `Tesseract` | Tesseract OCR (native Rust binding) |
+| `EasyOcr` | EasyOCR (Python-based, via FFI) |
+| `PaddleOcr` | PaddleOCR (Python-based, via FFI) |
+| `Custom` | Custom/third-party OCR backend |
 
 
 ---

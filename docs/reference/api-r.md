@@ -2,9 +2,212 @@
 title: "R API Reference"
 ---
 
-## R API Reference <span class="version-badge">v4.9.2</span>
+## R API Reference <span class="version-badge">v4.9.5</span>
 
 ### Functions
+
+#### blake3_hash_bytes()
+
+Hash arbitrary bytes with blake3, returning a 32-char hex string.
+
+**Signature:**
+
+```r
+blake3_hash_bytes(data)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `raw` | Yes | The data |
+
+**Returns:** `character`
+
+
+---
+
+#### blake3_hash_file()
+
+Hash a file's content with blake3 using streaming 64 KiB reads.
+
+Returns a 32-char hex string (128 bits of blake3 output).
+
+**Signature:**
+
+```r
+blake3_hash_file(path)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `path` | `character` | Yes | Path to the file |
+
+**Returns:** `character`
+
+**Errors:** Stops with error message.
+
+
+---
+
+#### fast_hash()
+
+**Signature:**
+
+```r
+fast_hash(data)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `raw` | Yes | The data |
+
+**Returns:** `integer`
+
+
+---
+
+#### validate_cache_key()
+
+**Signature:**
+
+```r
+validate_cache_key(key)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `key` | `character` | Yes | The key |
+
+**Returns:** `logical`
+
+
+---
+
+#### validate_port()
+
+Validate a port number for server configuration.
+
+Port must be in the range 1-65535. While ports 1-1023 are privileged and may require
+special permissions on some systems, they are still valid port numbers.
+
+**Returns:**
+
+`Ok(())` if the port is valid, or a `ValidationError` with details about valid ranges.
+
+**Signature:**
+
+```r
+validate_port(port)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `port` | `integer` | Yes | The port number to validate |
+
+**Returns:** `NULL`
+
+**Errors:** Stops with error message.
+
+
+---
+
+#### validate_host()
+
+Validate a host/IP address string for server configuration.
+
+Accepts valid IPv4 addresses (e.g., "127.0.0.1", "0.0.0.0"), valid IPv6 addresses
+(e.g., ".1", "."), and hostnames (e.g., "localhost", "example.com").
+
+**Returns:**
+
+`Ok(())` if the host is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```r
+validate_host(host)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `host` | `character` | Yes | The host/IP address string to validate |
+
+**Returns:** `NULL`
+
+**Errors:** Stops with error message.
+
+
+---
+
+#### validate_cors_origin()
+
+Validate a CORS (Cross-Origin Resource Sharing) origin URL.
+
+Accepts valid HTTP/HTTPS URLs (e.g., "<https://example.com">) or the wildcard "*"
+to allow all origins. URLs must start with "<http://"> or "<https://",> or be exactly "*".
+
+**Returns:**
+
+`Ok(())` if the origin is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```r
+validate_cors_origin(origin)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `origin` | `character` | Yes | The CORS origin URL to validate |
+
+**Returns:** `NULL`
+
+**Errors:** Stops with error message.
+
+
+---
+
+#### validate_upload_size()
+
+Validate an upload size limit for server configuration.
+
+Upload size must be greater than 0 (measured in bytes).
+
+**Returns:**
+
+`Ok(())` if the size is valid, or a `ValidationError` with details about constraints.
+
+**Signature:**
+
+```r
+validate_upload_size(size)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `size` | `integer` | Yes | The maximum upload size in bytes to validate |
+
+**Returns:** `NULL`
+
+**Errors:** Stops with error message.
+
+
+---
 
 #### validate_binarization_method()
 
@@ -791,6 +994,23 @@ list_supported_formats()
 
 ---
 
+#### clear_processor_cache()
+
+Clear the processor cache (primarily for testing when registry changes).
+
+**Signature:**
+
+```r
+clear_processor_cache()
+```
+
+**Returns:** `NULL`
+
+**Errors:** Stops with error message.
+
+
+---
+
 #### transform_extraction_result_to_elements()
 
 Transform an extraction result into semantic elements.
@@ -1042,6 +1262,21 @@ list_post_processors()
 **Returns:** `list`
 
 **Errors:** Stops with error message.
+
+
+---
+
+#### get_embedding_backend_registry()
+
+Get the global embedding backend registry.
+
+**Signature:**
+
+```r
+get_embedding_backend_registry()
+```
+
+**Returns:** `character`
 
 
 ---
@@ -1535,6 +1770,58 @@ calculate_text_confidence(text)
 | `text` | `character` | Yes | The text |
 
 **Returns:** `numeric`
+
+
+---
+
+#### create_string_buffer_pool()
+
+Create a pre-configured string buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for text accumulation with reasonable defaults.
+
+**Signature:**
+
+```r
+create_string_buffer_pool(pool_size, buffer_capacity)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `pool_size` | `integer` | Yes | Maximum number of buffers to keep in the pool |
+| `buffer_capacity` | `integer` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `StringBufferPool`
+
+
+---
+
+#### create_byte_buffer_pool()
+
+Create a pre-configured byte buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for binary data handling with reasonable defaults.
+
+**Signature:**
+
+```r
+create_byte_buffer_pool(pool_size, buffer_capacity)
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `pool_size` | `integer` | Yes | Maximum number of buffers to keep in the pool |
+| `buffer_capacity` | `integer` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `ByteBufferPool`
 
 
 ---
@@ -2182,25 +2469,6 @@ Request parameters for cache warm (model download).
 
 ---
 
-#### CharData
-
-Character information extracted from PDF with font metrics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `character` | — | The character text content |
-| `x` | `numeric` | — | X position in PDF units |
-| `y` | `numeric` | — | Y position in PDF units |
-| `font_size` | `numeric` | — | Font size in points |
-| `width` | `numeric` | — | Character width in PDF units |
-| `height` | `numeric` | — | Character height in PDF units |
-| `is_bold` | `logical` | — | Whether the font is bold (from pdfium force-bold flag) |
-| `is_italic` | `logical` | — | Whether the font is italic |
-| `baseline_y` | `numeric` | — | Baseline Y position (from character origin, falls back to bounds bottom) |
-
-
----
-
 #### Chunk
 
 A text chunk with optional embedding and metadata.
@@ -2302,6 +2570,70 @@ Use `..the default constructor` when constructing to allow for future field addi
 | `topic_threshold` | `numeric or NULL` | `NULL` | Optional cosine similarity threshold for semantic topic boundary detection. Only used when `chunker_type` is `Semantic` and an `EmbeddingConfig` is provided. You almost never need to set this. When omitted, defaults to `0.75` which works well for most documents. Lower values detect more topic boundaries (more, smaller chunks); higher values detect fewer. Range: `0.0..=1.0`. |
 
 ##### Methods
+
+###### with_chunker_type()
+
+Set the chunker type.
+
+**Signature:**
+
+```r
+with_chunker_type(chunker_type)
+```
+
+###### with_sizing()
+
+Set the sizing strategy.
+
+**Signature:**
+
+```r
+with_sizing(sizing)
+```
+
+###### with_prepend_heading_context()
+
+Enable or disable prepending heading context to chunk content.
+
+**Signature:**
+
+```r
+with_prepend_heading_context(prepend)
+```
+
+###### with_topic_threshold()
+
+Set the cosine similarity threshold for semantic topic boundary detection.
+
+**Panics:**
+
+Panics if `threshold` is outside `[0.0, 1.0]`.
+
+**Signature:**
+
+```r
+with_topic_threshold(threshold)
+```
+
+###### resolve_preset()
+
+Resolve a preset name into concrete chunking and embedding configuration.
+
+When `preset` is set (e.g., `"balanced"`), this overrides `max_characters` and
+`overlap` from the preset definition, and configures the embedding model if
+no embedding config was explicitly provided.
+
+If the preset name is not recognized, a warning is logged and the config
+is returned unchanged.
+
+Requires the `embeddings` feature. Without it, this is a no-op that returns
+the config unchanged.
+
+**Signature:**
+
+```r
+resolve_preset()
+```
 
 ###### default()
 
@@ -2820,6 +3152,7 @@ Request parameters for embedding generation.
 | `preset` | `character or NULL` | `NULL` | Embedding preset name (default: "balanced"). Available: "speed", "balanced", "quality" |
 | `model` | `character or NULL` | `NULL` | LLM model for provider-hosted embeddings (e.g., "openai/text-embedding-3-small"). When set, overrides preset and uses liter-llm for embedding generation. |
 | `api_key` | `character or NULL` | `NULL` | API key for the LLM provider (optional, falls back to env). |
+| `embedding_plugin` | `character or NULL` | `NULL` | Name of a pre-registered in-process embedding plugin backend. When set, overrides both preset and model and dispatches to the registered callback. Requires a prior call to `kreuzberg.plugins.register_embedding_backend`. |
 
 
 ---
@@ -2833,6 +3166,76 @@ Embedded file descriptor extracted from the PDF name tree.
 | `name` | `character` | — | The filename as stored in the PDF name tree. |
 | `data` | `raw` | — | Raw file bytes from the embedded stream. |
 | `mime_type` | `character or NULL` | `NULL` | MIME type if specified in the filespec, otherwise `NULL`. |
+
+
+---
+
+#### EmbeddingBackend
+
+Trait for in-process embedding backend plugins.
+
+Async to match the convention used by `crate.plugins.OcrBackend`,
+`crate.plugins.DocumentExtractor`, and `crate.plugins.PostProcessor`.
+Host-language bridges (PyO3, napi-rs, Rustler, extendr, magnus, ext-php-rs,
+C FFI, etc.) wrap their synchronous host callables in `spawn_blocking` or the
+equivalent to satisfy the async signature.
+
+# Thread safety
+
+Backends must be `Send + Sync + 'static`. They are stored in
+`Arc<dyn EmbeddingBackend>` and called concurrently from kreuzberg's chunking
+pipeline. If the backend's underlying model isn't thread-safe, the backend
+itself must serialize access internally (e.g. via `Mutex<Inner>`).
+
+# Contract
+
+- `embed(texts)` MUST return exactly `texts.len()` vectors, each of length
+  `self.dimensions()`. The dispatcher in `crate.embeddings.embed_texts`
+  validates this before returning to downstream consumers; a non-conforming
+  backend surfaces as a `KreuzbergError.Validation`, not a panic.
+- `embed` may be called from any thread. Its future must be `Send`
+  (enforced by `async_trait` when `#[async_trait]` is used on non-WASM targets).
+- `dimensions()` is called exactly once at registration, immediately after
+  `initialize()` succeeds. The returned value is cached by the registry and
+  used for all subsequent shape validation. Lazy-loading implementations can
+  defer model loading into `initialize()` and report the real dimension
+  afterwards. Later mutations of the backend's reported dimension are not
+  observed by kreuzberg — implementations that need to change dimension
+  must unregister and re-register.
+- `shutdown()` (inherited from `crate.plugins.Plugin`) may be invoked
+  concurrently with an in-flight `embed()` call. Implementations must
+  tolerate this — e.g. by letting in-flight calls finish using resources
+  held via the `Arc<dyn EmbeddingBackend>` reference, and only releasing
+  shared state that isn't needed by `embed`.
+
+##### Methods
+
+###### dimensions()
+
+Embedding vector dimension. Must be `> 0` and must match the length of
+every vector returned by `embed`.
+
+**Signature:**
+
+```r
+dimensions()
+```
+
+###### embed()
+
+Embed a batch of texts, returning one vector per input in order.
+
+**Errors:**
+
+Implementations should return `crate.KreuzbergError.Plugin` for
+backend-specific failures. The dispatcher layers its own validation
+(length, per-vector dimension) on top.
+
+**Signature:**
+
+```r
+embed(texts)
+```
 
 
 ---
@@ -2852,6 +3255,7 @@ Requires the `embeddings` feature to be enabled.
 | `show_download_progress` | `logical` | `false` | Show model download progress |
 | `cache_dir` | `character or NULL` | `NULL` | Custom cache directory for model files Defaults to `~/.cache/kreuzberg/embeddings/` if not specified. Allows full customization of model download location. |
 | `acceleration` | `AccelerationConfig or NULL` | `NULL` | Hardware acceleration for the embedding ONNX model. When set, controls which execution provider (CPU, CUDA, CoreML, TensorRT) is used for inference. Defaults to `NULL` (auto-select per platform). |
+| `max_embed_duration_secs` | `integer or NULL` | `NULL` | Maximum wall-clock duration (in seconds) for a single `embed()` call when using `EmbeddingModelType.Plugin`. Applies only to the in-process plugin path — protects against hung host-language backends (e.g. a Python callback deadlocked on the GIL, a model stuck on CUDA OOM retries, etc.). On timeout, the dispatcher returns `crate.KreuzbergError.Plugin` instead of blocking forever. `NULL` disables the timeout. The default (60 seconds) is conservative for common in-process inference; increase for large batches on slow hardware. |
 
 ##### Methods
 
@@ -3042,7 +3446,7 @@ Extracted inline image with metadata.
 | `format` | `character` | — | Format |
 | `filename` | `character or NULL` | `NULL` | Filename |
 | `description` | `character or NULL` | `NULL` | Human-readable description |
-| `dimensions` | `character or NULL` | `NULL` | Dimensions |
+| `dimensions` | `list or NULL` | `NULL` | Dimensions |
 | `attributes` | `list` | — | Attributes |
 
 
@@ -3098,6 +3502,26 @@ It can be loaded from TOML, YAML, or JSON files, or created programmatically.
 
 ```r
 default()
+```
+
+###### needs_image_processing()
+
+Check if image processing is needed by examining OCR and image extraction settings.
+
+Returns `true` if either OCR is enabled or image extraction is configured,
+indicating that image decompression and processing should occur.
+Returns `false` if both are disabled, allowing optimization to skip unnecessary
+image decompression for text-only extraction workflows.
+
+# Optimization Impact
+For text-only extractions (no OCR, no image extraction), skipping image
+decompression can improve CPU utilization by 5-10% by avoiding wasteful
+image I/O and processing when results won't be used.
+
+**Signature:**
+
+```r
+needs_image_processing()
 ```
 
 
@@ -3191,18 +3615,6 @@ cannot be overridden per file:
 | `timeout_secs` | `integer or NULL` | `NULL` | Override per-file extraction timeout in seconds. When set, the extraction for this file will be canceled after the specified duration. A timed-out file produces an error result without affecting other files in the batch. |
 | `tree_sitter` | `TreeSitterConfig or NULL` | `NULL` | Override tree-sitter configuration for this file. |
 | `structured_extraction` | `StructuredExtractionConfig or NULL` | `NULL` | Override structured extraction configuration for this file. When set, enables LLM-based structured extraction with a JSON schema for this specific file. The extracted content is sent to a VLM/LLM and the response is parsed according to the provided schema. |
-
-
----
-
-#### FontSizeCluster
-
-A cluster of text blocks with the same font size characteristics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `centroid` | `numeric` | — | The centroid (mean) font size of this cluster |
-| `members` | `list` | — | The text blocks that belong to this cluster |
 
 
 ---
@@ -3331,21 +3743,7 @@ font size clustering and hierarchical analysis.
 | `text` | `character` | — | The text content of this block |
 | `font_size` | `numeric` | — | The font size of the text in this block |
 | `level` | `character` | — | The hierarchy level of this block (H1-H6 or Body) Levels correspond to HTML heading tags: - "h1": Top-level heading - "h2": Secondary heading - "h3": Tertiary heading - "h4": Quaternary heading - "h5": Quinary heading - "h6": Senary heading - "body": Body text (no heading level) |
-| `bbox` | `character or NULL` | `NULL` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
-
-
----
-
-#### HierarchyBlock
-
-A TextBlock with hierarchy level assignment.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `character` | — | The text content |
-| `bbox` | `character` | — | The bounding box of the block |
-| `font_size` | `numeric` | — | The font size of the text in this block |
-| `hierarchy_level` | `character` | — | The hierarchy level of this block (H1-H6 or Body) |
+| `bbox` | `list or NULL` | `NULL` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
 
 
 ---
@@ -3472,6 +3870,7 @@ Image extraction configuration.
 | `auto_adjust_dpi` | `logical` | — | Automatically adjust DPI based on image content |
 | `min_dpi` | `integer` | — | Minimum DPI threshold |
 | `max_dpi` | `integer` | — | Maximum DPI threshold |
+| `max_images_per_page` | `integer or NULL` | `NULL` | Maximum number of image objects to extract per PDF page. Some PDFs (e.g. technical diagrams stored as thousands of raster fragments) can trigger extremely long or indefinite extraction times when every image object on a dense page is decoded individually via pdfium FFI. Setting this limit causes kreuzberg to stop collecting individual images once the count per page reaches the cap and emit a warning instead. `NULL` (default) means no limit — all images are extracted. |
 
 
 ---
@@ -3485,7 +3884,7 @@ Image element metadata.
 | `src` | `character` | — | Image source (URL, data URI, or SVG content) |
 | `alt` | `character or NULL` | `NULL` | Alternative text from alt attribute |
 | `title` | `character or NULL` | `NULL` | Title attribute |
-| `dimensions` | `character or NULL` | `NULL` | Image dimensions as (width, height) if available |
+| `dimensions` | `list or NULL` | `NULL` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `list` | — | Additional attributes as key-value pairs |
 
@@ -3545,13 +3944,13 @@ including DPI normalization, resizing, and resampling.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `original_dimensions` | `character` | — | Original image dimensions (width, height) in pixels |
-| `original_dpi` | `character` | — | Original image DPI (horizontal, vertical) |
+| `original_dimensions` | `list` | — | Original image dimensions (width, height) in pixels |
+| `original_dpi` | `list` | — | Original image DPI (horizontal, vertical) |
 | `target_dpi` | `integer` | — | Target DPI from configuration |
 | `scale_factor` | `numeric` | — | Scaling factor applied to the image |
 | `auto_adjusted` | `logical` | — | Whether DPI was auto-adjusted based on content |
 | `final_dpi` | `integer` | — | Final DPI after processing |
-| `new_dimensions` | `character or NULL` | `NULL` | New dimensions after resizing (if resized) |
+| `new_dimensions` | `list or NULL` | `NULL` | New dimensions after resizing (if resized) |
 | `resample_method` | `character` | — | Resampling algorithm used ("LANCZOS3", "CATMULLROM", etc.) |
 | `dimension_clamped` | `logical` | — | Whether dimensions were clamped to max_image_dimension |
 | `calculated_dpi` | `integer or NULL` | `NULL` | Calculated optimal DPI (if auto_adjust_dpi enabled) |
@@ -3633,7 +4032,7 @@ Keyword extraction configuration.
 | `algorithm` | `KeywordAlgorithm` | `"yake"` | Algorithm to use for extraction. |
 | `max_keywords` | `integer` | `10` | Maximum number of keywords to extract (default: 10). |
 | `min_score` | `numeric` | `0` | Minimum score threshold (0.0-1.0, default: 0.0). Keywords with scores below this threshold are filtered out. Note: Score ranges differ between algorithms. |
-| `ngram_range` | `character` | — | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
+| `ngram_range` | `list` | `list()` | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
 | `language` | `character or NULL` | `NULL` | Language code for stopword filtering (e.g., "en", "de", "fr"). If None, no stopword filtering is applied. |
 | `yake_params` | `YakeParams or NULL` | `NULL` | YAKE-specific tuning parameters. |
 | `rake_params` | `RakeParams or NULL` | `NULL` | RAKE-specific tuning parameters. |
@@ -3880,6 +4279,137 @@ Combined paths to all models needed for OCR (backward compatibility).
 
 ---
 
+#### OcrBackend
+
+Trait for OCR backend plugins.
+
+Implement this trait to add custom OCR capabilities. OCR backends can be:
+- Native Rust implementations (like Tesseract)
+- FFI bridges to Python libraries (like EasyOCR, PaddleOCR)
+- Cloud-based OCR services (Google Vision, AWS Textract, etc.)
+
+# Thread Safety
+
+OCR backends must be thread-safe (`Send + Sync`) to support concurrent processing.
+
+##### Methods
+
+###### process_image()
+
+Process an image and extract text via OCR.
+
+**Returns:**
+
+An `ExtractionResult` containing the extracted text and metadata.
+
+**Errors:**
+
+- `KreuzbergError.Ocr` - OCR processing failed
+- `KreuzbergError.Validation` - Invalid image format or configuration
+- `KreuzbergError.Io` - I/O errors (these always bubble up)
+
+**Signature:**
+
+```r
+process_image(image_bytes, config)
+```
+
+###### process_image_file()
+
+Process a file and extract text via OCR.
+
+Default implementation reads the file and calls `process_image`.
+Override for custom file handling or optimizations.
+
+**Errors:**
+
+Same as `process_image`, plus file I/O errors.
+
+**Signature:**
+
+```r
+process_image_file(path, config)
+```
+
+###### supports_language()
+
+Check if this backend supports a given language code.
+
+**Returns:**
+
+`true` if the language is supported, `false` otherwise.
+
+**Signature:**
+
+```r
+supports_language(lang)
+```
+
+###### backend_type()
+
+Get the backend type identifier.
+
+**Returns:**
+
+The backend type enum value.
+
+**Signature:**
+
+```r
+backend_type()
+```
+
+###### supported_languages()
+
+Optional: Get a list of all supported languages.
+
+Defaults to empty list. Override to provide comprehensive language support info.
+
+**Signature:**
+
+```r
+supported_languages()
+```
+
+###### supports_table_detection()
+
+Optional: Check if the backend supports table detection.
+
+Defaults to `false`. Override if your backend can detect and extract tables.
+
+**Signature:**
+
+```r
+supports_table_detection()
+```
+
+###### supports_document_processing()
+
+Check if the backend supports direct document-level processing (e.g. for PDFs).
+
+Defaults to `false`. Override if the backend has optimized document processing.
+
+**Signature:**
+
+```r
+supports_document_processing()
+```
+
+###### process_document()
+
+Process a document file directly via OCR.
+
+Only called if `supports_document_processing` returns `true`.
+
+**Signature:**
+
+```r
+process_document(path, config)
+```
+
+
+---
+
 #### OcrCacheStats
 
 | Field | Type | Default | Description |
@@ -3923,6 +4453,7 @@ OCR configuration.
 | `auto_rotate` | `logical` | `false` | Enable automatic page rotation based on orientation detection. When enabled, uses Tesseract's `DetectOrientationScript()` to detect page orientation (0/90/180/270 degrees) before OCR. If the page is rotated with high confidence, the image is corrected before recognition. This is critical for handling rotated scanned documents. |
 | `vlm_config` | `LlmConfig or NULL` | `NULL` | VLM (Vision Language Model) OCR configuration. Required when `backend` is `"vlm"`. Uses liter-llm to send page images to a vision model for text extraction. |
 | `vlm_prompt` | `character or NULL` | `NULL` | Custom Jinja2 prompt template for VLM OCR. When `NULL`, uses the default template. Available variables: - `{{ language }}` — The document language code (e.g., "eng", "deu"). |
+| `acceleration` | `AccelerationConfig or NULL` | `NULL` | Hardware acceleration for ONNX Runtime models (e.g. PaddleOCR, layout detection). Not user-configurable via config files — injected at runtime from `ExtractionConfig.acceleration` before each `process_image` call. |
 
 ##### Methods
 
@@ -3989,18 +4520,6 @@ including recognized text and detected tables.
 | `tables` | `list` | — | Tables detected and extracted via OCR |
 | `ocr_elements` | `list or NULL` | `NULL` | Structured OCR elements with bounding boxes and confidence scores. Available when TSV output is requested or table detection is enabled. |
 | `internal_document` | `character or NULL` | `NULL` | Structured document produced from hOCR parsing. Carries paragraph structure, bounding boxes, and confidence scores that the flattened `content` string discards. |
-
-
----
-
-#### OcrFallbackDecision
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `stats` | `character` | — | Stats |
-| `avg_non_whitespace` | `numeric` | — | Avg non whitespace |
-| `avg_alnum` | `numeric` | — | Avg alnum |
-| `fallback` | `logical` | — | Fallback |
 
 
 ---
@@ -4336,7 +4855,7 @@ and visibility state (for presentations).
 |-------|------|---------|-------------|
 | `number` | `integer` | — | Page number (1-indexed) |
 | `title` | `character or NULL` | `NULL` | Page title (usually for presentations) |
-| `dimensions` | `character or NULL` | `NULL` | Dimensions in points (PDF) or pixels (images): (width, height) |
+| `dimensions` | `list or NULL` | `NULL` | Dimensions in points (PDF) or pixels (images): (width, height) |
 | `image_count` | `integer or NULL` | `NULL` | Number of images on this page |
 | `table_count` | `integer or NULL` | `NULL` | Number of tables on this page |
 | `hidden` | `logical or NULL` | `NULL` | Whether this page is hidden (e.g., in presentations) |
@@ -4612,6 +5131,19 @@ Post-processor configuration.
 | `disabled_set` | `character or NULL` | `NULL` | Pre-computed AHashSet for O(1) disabled processor lookup |
 
 ##### Methods
+
+###### build_lookup_sets()
+
+Pre-compute HashSets for O(1) processor name lookups.
+
+This method converts the enabled/disabled processor Vec to HashSet
+for constant-time lookups in the pipeline.
+
+**Signature:**
+
+```r
+build_lookup_sets()
+```
 
 ###### default()
 
@@ -5553,6 +6085,7 @@ Embedding model types supported by Kreuzberg.
 | `preset` | Use a preset model configuration (recommended) — Fields: `name`: `character` |
 | `custom` | Use a custom ONNX model from HuggingFace — Fields: `model_id`: `character`, `dimensions`: `integer` |
 | `llm` | Provider-hosted embedding model via liter-llm. Uses the model specified in the nested `LlmConfig` (e.g., `"openai/text-embedding-3-small"`). — Fields: `llm`: `LlmConfig` |
+| `plugin` | In-process embedding backend registered via the plugin system. The caller registers an `EmbeddingBackend` once (e.g. a wrapper around an already-loaded `llama-cpp-python`, `sentence-transformers`, or tuned ONNX model), then references it by name in config. Kreuzberg calls back into the registered backend during chunking and standalone embed requests — no HuggingFace download, no ONNX Runtime requirement, no HTTP sidecar. When this variant is selected, only the following `EmbeddingConfig` fields apply: `normalize` (post-call L2 normalization) and `max_embed_duration_secs` (dispatcher timeout). Model-loading fields (`batch_size`, `cache_dir`, `show_download_progress`, `acceleration`) are ignored — the host owns the model lifecycle. See `crate.plugins.register_embedding_backend`. — Fields: `name`: `character` |
 
 
 ---
@@ -5581,6 +6114,20 @@ of `ExtractionResult`.
 | `no_bar` | No bar |
 | `linear` | Linear |
 | `skewed` | Skewed |
+
+
+---
+
+#### OcrBackendType
+
+OCR backend types.
+
+| Value | Description |
+|-------|-------------|
+| `tesseract` | Tesseract OCR (native Rust binding) |
+| `easy_ocr` | EasyOCR (Python-based, via FFI) |
+| `paddle_ocr` | PaddleOCR (Python-based, via FFI) |
+| `custom` | Custom/third-party OCR backend |
 
 
 ---

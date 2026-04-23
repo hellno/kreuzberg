@@ -2,9 +2,212 @@
 title: "Rust API Reference"
 ---
 
-## Rust API Reference <span class="version-badge">v4.9.2</span>
+## Rust API Reference <span class="version-badge">v4.9.5</span>
 
 ### Functions
+
+#### blake3_hash_bytes()
+
+Hash arbitrary bytes with blake3, returning a 32-char hex string.
+
+**Signature:**
+
+```rust
+pub fn blake3_hash_bytes(data: &[u8]) -> String
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `Vec<u8>` | Yes | The data |
+
+**Returns:** `String`
+
+
+---
+
+#### blake3_hash_file()
+
+Hash a file's content with blake3 using streaming 64 KiB reads.
+
+Returns a 32-char hex string (128 bits of blake3 output).
+
+**Signature:**
+
+```rust
+pub fn blake3_hash_file(path: PathBuf) -> Result<String, Error>
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `path` | `PathBuf` | Yes | Path to the file |
+
+**Returns:** `String`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
+
+#### fast_hash()
+
+**Signature:**
+
+```rust
+pub fn fast_hash(data: &[u8]) -> u64
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `data` | `Vec<u8>` | Yes | The data |
+
+**Returns:** `u64`
+
+
+---
+
+#### validate_cache_key()
+
+**Signature:**
+
+```rust
+pub fn validate_cache_key(key: &str) -> bool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `key` | `String` | Yes | The key |
+
+**Returns:** `bool`
+
+
+---
+
+#### validate_port()
+
+Validate a port number for server configuration.
+
+Port must be in the range 1-65535. While ports 1-1023 are privileged and may require
+special permissions on some systems, they are still valid port numbers.
+
+**Returns:**
+
+`Ok(())` if the port is valid, or a `ValidationError` with details about valid ranges.
+
+**Signature:**
+
+```rust
+pub fn validate_port(port: u16) -> Result<(), Error>
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `port` | `u16` | Yes | The port number to validate |
+
+**Returns:** `()`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
+
+#### validate_host()
+
+Validate a host/IP address string for server configuration.
+
+Accepts valid IPv4 addresses (e.g., "127.0.0.1", "0.0.0.0"), valid IPv6 addresses
+(e.g., ".1", "."), and hostnames (e.g., "localhost", "example.com").
+
+**Returns:**
+
+`Ok(())` if the host is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```rust
+pub fn validate_host(host: &str) -> Result<(), Error>
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `host` | `String` | Yes | The host/IP address string to validate |
+
+**Returns:** `()`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
+
+#### validate_cors_origin()
+
+Validate a CORS (Cross-Origin Resource Sharing) origin URL.
+
+Accepts valid HTTP/HTTPS URLs (e.g., "<https://example.com">) or the wildcard "*"
+to allow all origins. URLs must start with "<http://"> or "<https://",> or be exactly "*".
+
+**Returns:**
+
+`Ok(())` if the origin is valid, or a `ValidationError` with details about valid formats.
+
+**Signature:**
+
+```rust
+pub fn validate_cors_origin(origin: &str) -> Result<(), Error>
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `origin` | `String` | Yes | The CORS origin URL to validate |
+
+**Returns:** `()`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
+
+#### validate_upload_size()
+
+Validate an upload size limit for server configuration.
+
+Upload size must be greater than 0 (measured in bytes).
+
+**Returns:**
+
+`Ok(())` if the size is valid, or a `ValidationError` with details about constraints.
+
+**Signature:**
+
+```rust
+pub fn validate_upload_size(size: usize) -> Result<(), Error>
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `size` | `usize` | Yes | The maximum upload size in bytes to validate |
+
+**Returns:** `()`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
 
 #### validate_binarization_method()
 
@@ -791,6 +994,23 @@ pub fn list_supported_formats() -> Vec<SupportedFormat>
 
 ---
 
+#### clear_processor_cache()
+
+Clear the processor cache (primarily for testing when registry changes).
+
+**Signature:**
+
+```rust
+pub fn clear_processor_cache() -> Result<(), Error>
+```
+
+**Returns:** `()`
+
+**Errors:** Returns `Err(Error)`.
+
+
+---
+
 #### transform_extraction_result_to_elements()
 
 Transform an extraction result into semantic elements.
@@ -1042,6 +1262,21 @@ pub fn list_post_processors() -> Result<Vec<String>, Error>
 **Returns:** `Vec<String>`
 
 **Errors:** Returns `Err(Error)`.
+
+
+---
+
+#### get_embedding_backend_registry()
+
+Get the global embedding backend registry.
+
+**Signature:**
+
+```rust
+pub fn get_embedding_backend_registry() -> String
+```
+
+**Returns:** `String`
 
 
 ---
@@ -1535,6 +1770,58 @@ pub fn calculate_text_confidence(text: &str) -> f64
 | `text` | `String` | Yes | The text |
 
 **Returns:** `f64`
+
+
+---
+
+#### create_string_buffer_pool()
+
+Create a pre-configured string buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for text accumulation with reasonable defaults.
+
+**Signature:**
+
+```rust
+pub fn create_string_buffer_pool(pool_size: usize, buffer_capacity: usize) -> StringBufferPool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `pool_size` | `usize` | Yes | Maximum number of buffers to keep in the pool |
+| `buffer_capacity` | `usize` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `StringBufferPool`
+
+
+---
+
+#### create_byte_buffer_pool()
+
+Create a pre-configured byte buffer pool for batch processing.
+
+**Returns:**
+
+A pool configured for binary data handling with reasonable defaults.
+
+**Signature:**
+
+```rust
+pub fn create_byte_buffer_pool(pool_size: usize, buffer_capacity: usize) -> ByteBufferPool
+```
+
+**Parameters:**
+
+| Name | Type | Required | Description |
+|------|------|----------|-------------|
+| `pool_size` | `usize` | Yes | Maximum number of buffers to keep in the pool |
+| `buffer_capacity` | `usize` | Yes | Initial capacity for each buffer in bytes |
+
+**Returns:** `ByteBufferPool`
 
 
 ---
@@ -2182,25 +2469,6 @@ Request parameters for cache warm (model download).
 
 ---
 
-#### CharData
-
-Character information extracted from PDF with font metrics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `String` | — | The character text content |
-| `x` | `f32` | — | X position in PDF units |
-| `y` | `f32` | — | Y position in PDF units |
-| `font_size` | `f32` | — | Font size in points |
-| `width` | `f32` | — | Character width in PDF units |
-| `height` | `f32` | — | Character height in PDF units |
-| `is_bold` | `bool` | — | Whether the font is bold (from pdfium force-bold flag) |
-| `is_italic` | `bool` | — | Whether the font is italic |
-| `baseline_y` | `f32` | — | Baseline Y position (from character origin, falls back to bounds bottom) |
-
-
----
-
 #### Chunk
 
 A text chunk with optional embedding and metadata.
@@ -2302,6 +2570,70 @@ Use `..the default constructor` when constructing to allow for future field addi
 | `topic_threshold` | `Option<f32>` | `None` | Optional cosine similarity threshold for semantic topic boundary detection. Only used when `chunker_type` is `Semantic` and an `EmbeddingConfig` is provided. You almost never need to set this. When omitted, defaults to `0.75` which works well for most documents. Lower values detect more topic boundaries (more, smaller chunks); higher values detect fewer. Range: `0.0..=1.0`. |
 
 ##### Methods
+
+###### with_chunker_type()
+
+Set the chunker type.
+
+**Signature:**
+
+```rust
+pub fn with_chunker_type(&self, chunker_type: ChunkerType) -> ChunkingConfig
+```
+
+###### with_sizing()
+
+Set the sizing strategy.
+
+**Signature:**
+
+```rust
+pub fn with_sizing(&self, sizing: ChunkSizing) -> ChunkingConfig
+```
+
+###### with_prepend_heading_context()
+
+Enable or disable prepending heading context to chunk content.
+
+**Signature:**
+
+```rust
+pub fn with_prepend_heading_context(&self, prepend: bool) -> ChunkingConfig
+```
+
+###### with_topic_threshold()
+
+Set the cosine similarity threshold for semantic topic boundary detection.
+
+**Panics:**
+
+Panics if `threshold` is outside `[0.0, 1.0]`.
+
+**Signature:**
+
+```rust
+pub fn with_topic_threshold(&self, threshold: f32) -> ChunkingConfig
+```
+
+###### resolve_preset()
+
+Resolve a preset name into concrete chunking and embedding configuration.
+
+When `preset` is set (e.g., `"balanced"`), this overrides `max_characters` and
+`overlap` from the preset definition, and configures the embedding model if
+no embedding config was explicitly provided.
+
+If the preset name is not recognized, a warning is logged and the config
+is returned unchanged.
+
+Requires the `embeddings` feature. Without it, this is a no-op that returns
+the config unchanged.
+
+**Signature:**
+
+```rust
+pub fn resolve_preset(&self) -> ChunkingConfig
+```
 
 ###### default()
 
@@ -2820,6 +3152,7 @@ Request parameters for embedding generation.
 | `preset` | `Option<String>` | `None` | Embedding preset name (default: "balanced"). Available: "speed", "balanced", "quality" |
 | `model` | `Option<String>` | `None` | LLM model for provider-hosted embeddings (e.g., "openai/text-embedding-3-small"). When set, overrides preset and uses liter-llm for embedding generation. |
 | `api_key` | `Option<String>` | `None` | API key for the LLM provider (optional, falls back to env). |
+| `embedding_plugin` | `Option<String>` | `None` | Name of a pre-registered in-process embedding plugin backend. When set, overrides both preset and model and dispatches to the registered callback. Requires a prior call to `kreuzberg.plugins.register_embedding_backend`. |
 
 
 ---
@@ -2833,6 +3166,76 @@ Embedded file descriptor extracted from the PDF name tree.
 | `name` | `String` | — | The filename as stored in the PDF name tree. |
 | `data` | `Vec<u8>` | — | Raw file bytes from the embedded stream. |
 | `mime_type` | `Option<String>` | `None` | MIME type if specified in the filespec, otherwise `None`. |
+
+
+---
+
+#### EmbeddingBackend
+
+Trait for in-process embedding backend plugins.
+
+Async to match the convention used by `crate.plugins.OcrBackend`,
+`crate.plugins.DocumentExtractor`, and `crate.plugins.PostProcessor`.
+Host-language bridges (PyO3, napi-rs, Rustler, extendr, magnus, ext-php-rs,
+C FFI, etc.) wrap their synchronous host callables in `spawn_blocking` or the
+equivalent to satisfy the async signature.
+
+# Thread safety
+
+Backends must be `Send + Sync + 'static`. They are stored in
+`Arc<dyn EmbeddingBackend>` and called concurrently from kreuzberg's chunking
+pipeline. If the backend's underlying model isn't thread-safe, the backend
+itself must serialize access internally (e.g. via `Mutex<Inner>`).
+
+# Contract
+
+- `embed(texts)` MUST return exactly `texts.len()` vectors, each of length
+  `self.dimensions()`. The dispatcher in `crate.embeddings.embed_texts`
+  validates this before returning to downstream consumers; a non-conforming
+  backend surfaces as a `KreuzbergError.Validation`, not a panic.
+- `embed` may be called from any thread. Its future must be `Send`
+  (enforced by `async_trait` when `#[async_trait]` is used on non-WASM targets).
+- `dimensions()` is called exactly once at registration, immediately after
+  `initialize()` succeeds. The returned value is cached by the registry and
+  used for all subsequent shape validation. Lazy-loading implementations can
+  defer model loading into `initialize()` and report the real dimension
+  afterwards. Later mutations of the backend's reported dimension are not
+  observed by kreuzberg — implementations that need to change dimension
+  must unregister and re-register.
+- `shutdown()` (inherited from `crate.plugins.Plugin`) may be invoked
+  concurrently with an in-flight `embed()` call. Implementations must
+  tolerate this — e.g. by letting in-flight calls finish using resources
+  held via the `Arc<dyn EmbeddingBackend>` reference, and only releasing
+  shared state that isn't needed by `embed`.
+
+##### Methods
+
+###### dimensions()
+
+Embedding vector dimension. Must be `> 0` and must match the length of
+every vector returned by `embed`.
+
+**Signature:**
+
+```rust
+pub fn dimensions(&self) -> usize
+```
+
+###### embed()
+
+Embed a batch of texts, returning one vector per input in order.
+
+**Errors:**
+
+Implementations should return `crate.KreuzbergError.Plugin` for
+backend-specific failures. The dispatcher layers its own validation
+(length, per-vector dimension) on top.
+
+**Signature:**
+
+```rust
+pub fn embed(&self, texts: Vec<String>) -> Vec<Vec<f32>>
+```
 
 
 ---
@@ -2852,6 +3255,7 @@ Requires the `embeddings` feature to be enabled.
 | `show_download_progress` | `bool` | `false` | Show model download progress |
 | `cache_dir` | `Option<PathBuf>` | `None` | Custom cache directory for model files Defaults to `~/.cache/kreuzberg/embeddings/` if not specified. Allows full customization of model download location. |
 | `acceleration` | `Option<AccelerationConfig>` | `None` | Hardware acceleration for the embedding ONNX model. When set, controls which execution provider (CPU, CUDA, CoreML, TensorRT) is used for inference. Defaults to `None` (auto-select per platform). |
+| `max_embed_duration_secs` | `Option<u64>` | `Default::default()` | Maximum wall-clock duration (in seconds) for a single `embed()` call when using `EmbeddingModelType.Plugin`. Applies only to the in-process plugin path — protects against hung host-language backends (e.g. a Python callback deadlocked on the GIL, a model stuck on CUDA OOM retries, etc.). On timeout, the dispatcher returns `crate.KreuzbergError.Plugin` instead of blocking forever. `None` disables the timeout. The default (60 seconds) is conservative for common in-process inference; increase for large batches on slow hardware. |
 
 ##### Methods
 
@@ -3042,7 +3446,7 @@ Extracted inline image with metadata.
 | `format` | `String` | — | Format |
 | `filename` | `Option<String>` | `None` | Filename |
 | `description` | `Option<String>` | `None` | Human-readable description |
-| `dimensions` | `Option<String>` | `None` | Dimensions |
+| `dimensions` | `Option<Vec<u32>>` | `None` | Dimensions |
 | `attributes` | `Vec<String>` | — | Attributes |
 
 
@@ -3098,6 +3502,26 @@ It can be loaded from TOML, YAML, or JSON files, or created programmatically.
 
 ```rust
 pub fn default() -> ExtractionConfig
+```
+
+###### needs_image_processing()
+
+Check if image processing is needed by examining OCR and image extraction settings.
+
+Returns `true` if either OCR is enabled or image extraction is configured,
+indicating that image decompression and processing should occur.
+Returns `false` if both are disabled, allowing optimization to skip unnecessary
+image decompression for text-only extraction workflows.
+
+# Optimization Impact
+For text-only extractions (no OCR, no image extraction), skipping image
+decompression can improve CPU utilization by 5-10% by avoiding wasteful
+image I/O and processing when results won't be used.
+
+**Signature:**
+
+```rust
+pub fn needs_image_processing(&self) -> bool
 ```
 
 
@@ -3191,18 +3615,6 @@ cannot be overridden per file:
 | `timeout_secs` | `Option<u64>` | `Default::default()` | Override per-file extraction timeout in seconds. When set, the extraction for this file will be canceled after the specified duration. A timed-out file produces an error result without affecting other files in the batch. |
 | `tree_sitter` | `Option<TreeSitterConfig>` | `Default::default()` | Override tree-sitter configuration for this file. |
 | `structured_extraction` | `Option<StructuredExtractionConfig>` | `Default::default()` | Override structured extraction configuration for this file. When set, enables LLM-based structured extraction with a JSON schema for this specific file. The extracted content is sent to a VLM/LLM and the response is parsed according to the provided schema. |
-
-
----
-
-#### FontSizeCluster
-
-A cluster of text blocks with the same font size characteristics.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `centroid` | `f32` | — | The centroid (mean) font size of this cluster |
-| `members` | `Vec<String>` | — | The text blocks that belong to this cluster |
 
 
 ---
@@ -3331,21 +3743,7 @@ font size clustering and hierarchical analysis.
 | `text` | `String` | — | The text content of this block |
 | `font_size` | `f32` | — | The font size of the text in this block |
 | `level` | `String` | — | The hierarchy level of this block (H1-H6 or Body) Levels correspond to HTML heading tags: - "h1": Top-level heading - "h2": Secondary heading - "h3": Tertiary heading - "h4": Quaternary heading - "h5": Quinary heading - "h6": Senary heading - "body": Body text (no heading level) |
-| `bbox` | `Option<String>` | `None` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
-
-
----
-
-#### HierarchyBlock
-
-A TextBlock with hierarchy level assignment.
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `text` | `String` | — | The text content |
-| `bbox` | `String` | — | The bounding box of the block |
-| `font_size` | `f32` | — | The font size of the text in this block |
-| `hierarchy_level` | `String` | — | The hierarchy level of this block (H1-H6 or Body) |
+| `bbox` | `Option<Vec<f32>>` | `None` | Bounding box information for the block Contains coordinates as (left, top, right, bottom) in PDF units. |
 
 
 ---
@@ -3472,6 +3870,7 @@ Image extraction configuration.
 | `auto_adjust_dpi` | `bool` | — | Automatically adjust DPI based on image content |
 | `min_dpi` | `i32` | — | Minimum DPI threshold |
 | `max_dpi` | `i32` | — | Maximum DPI threshold |
+| `max_images_per_page` | `Option<u32>` | `Default::default()` | Maximum number of image objects to extract per PDF page. Some PDFs (e.g. technical diagrams stored as thousands of raster fragments) can trigger extremely long or indefinite extraction times when every image object on a dense page is decoded individually via pdfium FFI. Setting this limit causes kreuzberg to stop collecting individual images once the count per page reaches the cap and emit a warning instead. `None` (default) means no limit — all images are extracted. |
 
 
 ---
@@ -3485,7 +3884,7 @@ Image element metadata.
 | `src` | `String` | — | Image source (URL, data URI, or SVG content) |
 | `alt` | `Option<String>` | `None` | Alternative text from alt attribute |
 | `title` | `Option<String>` | `None` | Title attribute |
-| `dimensions` | `Option<String>` | `None` | Image dimensions as (width, height) if available |
+| `dimensions` | `Option<Vec<u32>>` | `None` | Image dimensions as (width, height) if available |
 | `image_type` | `ImageType` | — | Image type classification |
 | `attributes` | `Vec<String>` | — | Additional attributes as key-value pairs |
 
@@ -3545,13 +3944,13 @@ including DPI normalization, resizing, and resampling.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `original_dimensions` | `String` | — | Original image dimensions (width, height) in pixels |
-| `original_dpi` | `String` | — | Original image DPI (horizontal, vertical) |
+| `original_dimensions` | `Vec<usize>` | — | Original image dimensions (width, height) in pixels |
+| `original_dpi` | `Vec<f64>` | — | Original image DPI (horizontal, vertical) |
 | `target_dpi` | `i32` | — | Target DPI from configuration |
 | `scale_factor` | `f64` | — | Scaling factor applied to the image |
 | `auto_adjusted` | `bool` | — | Whether DPI was auto-adjusted based on content |
 | `final_dpi` | `i32` | — | Final DPI after processing |
-| `new_dimensions` | `Option<String>` | `None` | New dimensions after resizing (if resized) |
+| `new_dimensions` | `Option<Vec<usize>>` | `None` | New dimensions after resizing (if resized) |
 | `resample_method` | `String` | — | Resampling algorithm used ("LANCZOS3", "CATMULLROM", etc.) |
 | `dimension_clamped` | `bool` | — | Whether dimensions were clamped to max_image_dimension |
 | `calculated_dpi` | `Option<i32>` | `None` | Calculated optimal DPI (if auto_adjust_dpi enabled) |
@@ -3633,7 +4032,7 @@ Keyword extraction configuration.
 | `algorithm` | `KeywordAlgorithm` | `KeywordAlgorithm::Yake` | Algorithm to use for extraction. |
 | `max_keywords` | `usize` | `10` | Maximum number of keywords to extract (default: 10). |
 | `min_score` | `f32` | `0` | Minimum score threshold (0.0-1.0, default: 0.0). Keywords with scores below this threshold are filtered out. Note: Score ranges differ between algorithms. |
-| `ngram_range` | `String` | — | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
+| `ngram_range` | `Vec<usize>` | `vec![]` | N-gram range for keyword extraction (min, max). (1, 1) = unigrams only (1, 2) = unigrams and bigrams (1, 3) = unigrams, bigrams, and trigrams (default) |
 | `language` | `Option<String>` | `Default::default()` | Language code for stopword filtering (e.g., "en", "de", "fr"). If None, no stopword filtering is applied. |
 | `yake_params` | `Option<YakeParams>` | `None` | YAKE-specific tuning parameters. |
 | `rake_params` | `Option<RakeParams>` | `None` | RAKE-specific tuning parameters. |
@@ -3880,6 +4279,137 @@ Combined paths to all models needed for OCR (backward compatibility).
 
 ---
 
+#### OcrBackend
+
+Trait for OCR backend plugins.
+
+Implement this trait to add custom OCR capabilities. OCR backends can be:
+- Native Rust implementations (like Tesseract)
+- FFI bridges to Python libraries (like EasyOCR, PaddleOCR)
+- Cloud-based OCR services (Google Vision, AWS Textract, etc.)
+
+# Thread Safety
+
+OCR backends must be thread-safe (`Send + Sync`) to support concurrent processing.
+
+##### Methods
+
+###### process_image()
+
+Process an image and extract text via OCR.
+
+**Returns:**
+
+An `ExtractionResult` containing the extracted text and metadata.
+
+**Errors:**
+
+- `KreuzbergError.Ocr` - OCR processing failed
+- `KreuzbergError.Validation` - Invalid image format or configuration
+- `KreuzbergError.Io` - I/O errors (these always bubble up)
+
+**Signature:**
+
+```rust
+pub fn process_image(&self, image_bytes: &[u8], config: OcrConfig) -> ExtractionResult
+```
+
+###### process_image_file()
+
+Process a file and extract text via OCR.
+
+Default implementation reads the file and calls `process_image`.
+Override for custom file handling or optimizations.
+
+**Errors:**
+
+Same as `process_image`, plus file I/O errors.
+
+**Signature:**
+
+```rust
+pub fn process_image_file(&self, path: PathBuf, config: OcrConfig) -> ExtractionResult
+```
+
+###### supports_language()
+
+Check if this backend supports a given language code.
+
+**Returns:**
+
+`true` if the language is supported, `false` otherwise.
+
+**Signature:**
+
+```rust
+pub fn supports_language(&self, lang: &str) -> bool
+```
+
+###### backend_type()
+
+Get the backend type identifier.
+
+**Returns:**
+
+The backend type enum value.
+
+**Signature:**
+
+```rust
+pub fn backend_type(&self) -> OcrBackendType
+```
+
+###### supported_languages()
+
+Optional: Get a list of all supported languages.
+
+Defaults to empty list. Override to provide comprehensive language support info.
+
+**Signature:**
+
+```rust
+pub fn supported_languages(&self) -> Vec<String>
+```
+
+###### supports_table_detection()
+
+Optional: Check if the backend supports table detection.
+
+Defaults to `false`. Override if your backend can detect and extract tables.
+
+**Signature:**
+
+```rust
+pub fn supports_table_detection(&self) -> bool
+```
+
+###### supports_document_processing()
+
+Check if the backend supports direct document-level processing (e.g. for PDFs).
+
+Defaults to `false`. Override if the backend has optimized document processing.
+
+**Signature:**
+
+```rust
+pub fn supports_document_processing(&self) -> bool
+```
+
+###### process_document()
+
+Process a document file directly via OCR.
+
+Only called if `supports_document_processing` returns `true`.
+
+**Signature:**
+
+```rust
+pub fn process_document(&self, path: PathBuf, config: OcrConfig) -> ExtractionResult
+```
+
+
+---
+
 #### OcrCacheStats
 
 | Field | Type | Default | Description |
@@ -3923,6 +4453,7 @@ OCR configuration.
 | `auto_rotate` | `bool` | `false` | Enable automatic page rotation based on orientation detection. When enabled, uses Tesseract's `DetectOrientationScript()` to detect page orientation (0/90/180/270 degrees) before OCR. If the page is rotated with high confidence, the image is corrected before recognition. This is critical for handling rotated scanned documents. |
 | `vlm_config` | `Option<LlmConfig>` | `None` | VLM (Vision Language Model) OCR configuration. Required when `backend` is `"vlm"`. Uses liter-llm to send page images to a vision model for text extraction. |
 | `vlm_prompt` | `Option<String>` | `None` | Custom Jinja2 prompt template for VLM OCR. When `None`, uses the default template. Available variables: - `{{ language }}` — The document language code (e.g., "eng", "deu"). |
+| `acceleration` | `Option<AccelerationConfig>` | `None` | Hardware acceleration for ONNX Runtime models (e.g. PaddleOCR, layout detection). Not user-configurable via config files — injected at runtime from `ExtractionConfig.acceleration` before each `process_image` call. |
 
 ##### Methods
 
@@ -3989,18 +4520,6 @@ including recognized text and detected tables.
 | `tables` | `Vec<OcrTable>` | — | Tables detected and extracted via OCR |
 | `ocr_elements` | `Option<Vec<OcrElement>>` | `None` | Structured OCR elements with bounding boxes and confidence scores. Available when TSV output is requested or table detection is enabled. |
 | `internal_document` | `Option<String>` | `None` | Structured document produced from hOCR parsing. Carries paragraph structure, bounding boxes, and confidence scores that the flattened `content` string discards. |
-
-
----
-
-#### OcrFallbackDecision
-
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `stats` | `String` | — | Stats |
-| `avg_non_whitespace` | `f64` | — | Avg non whitespace |
-| `avg_alnum` | `f64` | — | Avg alnum |
-| `fallback` | `bool` | — | Fallback |
 
 
 ---
@@ -4336,7 +4855,7 @@ and visibility state (for presentations).
 |-------|------|---------|-------------|
 | `number` | `usize` | — | Page number (1-indexed) |
 | `title` | `Option<String>` | `None` | Page title (usually for presentations) |
-| `dimensions` | `Option<String>` | `None` | Dimensions in points (PDF) or pixels (images): (width, height) |
+| `dimensions` | `Option<Vec<f64>>` | `None` | Dimensions in points (PDF) or pixels (images): (width, height) |
 | `image_count` | `Option<usize>` | `None` | Number of images on this page |
 | `table_count` | `Option<usize>` | `None` | Number of tables on this page |
 | `hidden` | `Option<bool>` | `None` | Whether this page is hidden (e.g., in presentations) |
@@ -4612,6 +5131,19 @@ Post-processor configuration.
 | `disabled_set` | `Option<String>` | `None` | Pre-computed AHashSet for O(1) disabled processor lookup |
 
 ##### Methods
+
+###### build_lookup_sets()
+
+Pre-compute HashSets for O(1) processor name lookups.
+
+This method converts the enabled/disabled processor Vec to HashSet
+for constant-time lookups in the pipeline.
+
+**Signature:**
+
+```rust
+pub fn build_lookup_sets(&self)
+```
 
 ###### default()
 
@@ -5553,6 +6085,7 @@ Embedding model types supported by Kreuzberg.
 | `Preset` | Use a preset model configuration (recommended) — Fields: `name`: `String` |
 | `Custom` | Use a custom ONNX model from HuggingFace — Fields: `model_id`: `String`, `dimensions`: `usize` |
 | `Llm` | Provider-hosted embedding model via liter-llm. Uses the model specified in the nested `LlmConfig` (e.g., `"openai/text-embedding-3-small"`). — Fields: `llm`: `LlmConfig` |
+| `Plugin` | In-process embedding backend registered via the plugin system. The caller registers an `EmbeddingBackend` once (e.g. a wrapper around an already-loaded `llama-cpp-python`, `sentence-transformers`, or tuned ONNX model), then references it by name in config. Kreuzberg calls back into the registered backend during chunking and standalone embed requests — no HuggingFace download, no ONNX Runtime requirement, no HTTP sidecar. When this variant is selected, only the following `EmbeddingConfig` fields apply: `normalize` (post-call L2 normalization) and `max_embed_duration_secs` (dispatcher timeout). Model-loading fields (`batch_size`, `cache_dir`, `show_download_progress`, `acceleration`) are ignored — the host owns the model lifecycle. See `crate.plugins.register_embedding_backend`. — Fields: `name`: `String` |
 
 
 ---
@@ -5581,6 +6114,20 @@ of `ExtractionResult`.
 | `NoBar` | No bar |
 | `Linear` | Linear |
 | `Skewed` | Skewed |
+
+
+---
+
+#### OcrBackendType
+
+OCR backend types.
+
+| Value | Description |
+|-------|-------------|
+| `Tesseract` | Tesseract OCR (native Rust binding) |
+| `EasyOcr` | EasyOCR (Python-based, via FFI) |
+| `PaddleOcr` | PaddleOCR (Python-based, via FFI) |
+| `Custom` | Custom/third-party OCR backend |
 
 
 ---
